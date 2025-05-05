@@ -1,0 +1,269 @@
+*&---------------------------------------------------------------------*
+*& Report ZABAP_DEMO05_56550
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zabap_demo05_56550.
+
+* Variáveis Globais e Tipificações Locais
+TYPES: BEGIN OF ty_s_kna1,
+         kunnr TYPE kna1-kunnr, "Cliente
+         name1 TYPE kna1-name1, "Nome
+         ort01 TYPE kna1-ort01, "Cidade
+         pstlz TYPE kna1-pstlz, "Código Postal
+         stceg TYPE kna1-stceg, "NIF
+       END OF ty_s_kna1.
+
+
+TYPES ty_t_kna1 TYPE STANDARD TABLE OF ty_s_kna1
+                WITH NON-UNIQUE KEY kunnr.
+
+TYPES: BEGIN OF ty_s_loja,
+         werks TYPE werks_d,               " Loja
+         lgort TYPE lgort_d,               " Secção
+         matnr TYPE matnr,                 " Material
+         quant TYPE p LENGTH 7 DECIMALS 2, " Quantidade
+       END OF ty_s_loja.
+
+TYPES ty_t_loja TYPE HASHED TABLE OF ty_s_loja " Aceder a tabela pela sua chave
+    WITH UNIQUE KEY werks lgort matnr.
+
+* Constantes
+
+* Ecrã de Seleção
+
+* Classes Locais
+
+* Rotinas
+
+* Pré-preenchimento do Ecrã Seleção
+INITIALIZATION.
+
+* Secção Principal
+START-OF-SELECTION.
+
+* Tabelas
+  DATA t_kna1 TYPE ty_t_kna1.
+  DATA t_loja TYPE ty_t_loja.
+
+* Estruturas
+  DATA wa_kna1 TYPE ty_s_kna1.
+  DATA wa_loja TYPE ty_s_loja.
+
+* Variáveis
+  DATA v_lines TYPE i.
+
+
+  FIELD-SYMBOLS <fs_kna1> TYPE ty_s_kna1.
+
+**********************************************************************
+* Ler linhas de uma tabela
+  LOOP AT t_kna1 INTO wa_kna1.
+
+  ENDLOOP.
+
+* Ler depois da 3ª linha
+  LOOP AT t_kna1 INTO wa_kna1 FROM 3.
+
+  ENDLOOP.
+
+* Ler até 5ª linha
+  LOOP AT t_kna1 INTO wa_kna1 TO 5.
+
+  ENDLOOP.
+
+* Ler entre a 2ª e 6ª linha
+  LOOP AT t_kna1 INTO wa_kna1 FROM 2 TO 6.
+
+  ENDLOOP.
+
+* Ler condicionalmente
+  LOOP AT t_kna1 INTO wa_kna1 WHERE ort01 = 'Bragança'
+                                AND pstlz = '5300-000'.
+
+  ENDLOOP.
+
+* Ler apenas uma linha da tabela
+  READ TABLE t_kna1 INTO wa_kna1 INDEX 2.
+
+  READ TABLE t_kna1 INTO wa_kna1 WITH KEY kunnr = '0000000001'.
+
+  READ TABLE t_kna1 INTO wa_kna1 WITH KEY ort01 = 'Bragança'
+                                          pstlz = '5300-000'.
+
+  IF sy-subrc = 0.
+    "Verdadeiro
+  ELSE.
+    "Falso
+  ENDIF.
+
+* Modificar dados de tabela interna
+  wa_kna1-pstlz = '5300-999'.
+
+  MODIFY t_kna1 FROM wa_kna1
+                TRANSPORTING pstlz        "Campos a alterar
+                WHERE ort01 = 'Bragança'. "Condição
+
+* Modificar através de apontadores
+  LOOP AT t_kna1 ASSIGNING <fs_kna1>.
+
+    CASE <fs_kna1>-ort01.
+      WHEN 'Bragança'.
+        <fs_kna1>-pstlz = '5300-999'.
+      WHEN 'São João da Madeira'.
+        <fs_kna1>-pstlz = '3700-999'.
+    ENDCASE.
+
+  ENDLOOP.
+
+* Modificar apenas um registo através de apontadores
+  READ TABLE t_kna1 ASSIGNING <fs_kna1> INDEX 3.
+
+  IF <fs_kna1> IS ASSIGNED.
+    <fs_kna1>-pstlz = '5300-999'.
+  ENDIF.
+
+* Inicializar o apontador
+  UNASSIGN <fs_kna1>.
+
+  READ TABLE t_kna1 ASSIGNING <fs_kna1> WITH KEY kunnr = '0000000001'.
+
+  IF <fs_kna1> IS ASSIGNED.
+    <fs_kna1>-pstlz = '5300-999'.
+  ENDIF.
+
+* Anexar conteúdo a uma tabela interna
+* - Anexar a partir de estruturas
+  wa_kna1-kunnr = '0000000001'.
+  wa_kna1-name1 = 'IPB'.
+  wa_kna1-ort01 = 'Bragança'.
+  wa_kna1-pstlz = '5300-000'.
+  wa_kna1-stceg = '123456789'.
+  APPEND wa_kna1 TO t_kna1.
+
+  APPEND INITIAL LINE TO t_kna1. "Adiciona uma linha vazia
+
+* - Anexar a partir de apontadores
+  APPEND INITIAL LINE TO t_kna1 ASSIGNING <fs_kna1>.
+
+  <fs_kna1>-kunnr = '0000000002'.
+  <fs_kna1>-name1 = 'José Socrates'.
+  <fs_kna1>-ort01 = 'Prisão de Lisboa'.
+  <fs_kna1>-pstlz = '2700-000'.
+  <fs_kna1>-stceg = '987654321'.
+
+  INSERT wa_kna1 INTO t_kna1 INDEX 5. "Adiciona dados numa linha especifica
+
+* Ordernar tabelas internas
+  SORT t_kna1. "Ordena pelos campos todos (Default -> ascendente)
+
+  SORT t_kna1 BY kunnr. "Ordena pelo cliente (Default -> ascendente)
+
+  SORT t_kna1 BY kunnr ort01.
+  SORT t_kna1 BY kunnr ASCENDING
+                 ort01 ASCENDING.
+  SORT t_kna1 ASCENDING BY kunnr ort01.
+
+  SORT t_kna1 BY kunnr DESCENDING
+                 ort01 DESCENDING.
+  SORT t_kna1 DESCENDING BY kunnr ort01.
+
+  SORT t_kna1 BY kunnr ASCENDING
+                 ort01 DESCENDING.
+
+* Ler dados de tabelas ordenadas
+  SORT t_kna1.
+
+  READ TABLE t_kna1 INTO wa_kna1 WITH KEY kunnr = '0000000001'
+                                 BINARY SEARCH.
+
+* Eliminar registos de uma tabela interna
+  DELETE t_kna1 INDEX 3.
+
+  "Eliminar registos depois da 3ª linha
+  DELETE t_kna1 FROM 3.
+
+  "Eliminar registos até à 2ª linha
+  DELETE t_kna1 TO 2.
+
+  "Eliminar registos entre 3ª e 5ª linha
+  DELETE t_kna1 FROM 3 TO 5.
+
+  "Eliminar condicionalmente
+  DELETE t_kna1 WHERE ort01 = 'Bragança'
+                  AND stceg CP 'PT*'.
+
+* Eliminar registos duplicados
+  SORT t_kna1.
+
+  DELETE ADJACENT DUPLICATES FROM t_kna1 COMPARING ort01 stceg.
+
+  DELETE ADJACENT DUPLICATES FROM t_kna1.
+  DELETE ADJACENT DUPLICATES FROM t_kna1 COMPARING ALL FIELDS.
+
+* Limpar tabelas
+  CLEAR t_kna1[].
+
+  FREE t_kna1[]. "Libertar memória
+
+* Verificar se existem registos numa tabela interna
+  LOOP AT t_kna1 TRANSPORTING NO FIELDS
+                 WHERE ort01 = 'Bragança'
+                   AND stceg CP 'PT*'.
+
+  ENDLOOP.
+
+  IF sy-subrc <> 0.
+    "Mensagem de erro
+  ENDIF.
+
+  READ TABLE t_kna1 TRANSPORTING NO FIELDS
+                    WITH KEY ort01 = 'Bragança'
+                             stceg = '0000000001'.
+
+  IF sy-subrc = 0.
+    "Verdadeiro
+  ELSE.
+    "Falso
+  ENDIF.
+
+**********************************************************************
+
+* Agregar dados numa tabela pelos campos chaves, somando as quantidades do material *
+
+  BREAK-POINT. " Debug
+
+  wa_loja-werks = '1000'. " Loja
+  wa_loja-lgort = '1001'. " Secção
+  wa_loja-matnr = 'A1'.   " Material
+  wa_loja-quant = 50.     " Quantidade
+  COLLECT wa_loja INTO t_loja. " Agrupar dados
+
+  wa_loja-werks = '1000'. " Loja
+  wa_loja-lgort = '1001'. " Secção
+  wa_loja-matnr = 'A2'.   " Material
+  wa_loja-quant = 200.     " Quantidade
+  COLLECT wa_loja INTO t_loja. " Agrupar dados
+
+  " Valida as chaves primárias e faz somatório das quantidades
+  wa_loja-werks = '1000'. " Loja
+  wa_loja-lgort = '1001'. " Secção
+  wa_loja-matnr = 'A2'.   " Material
+  wa_loja-quant = 150.     " Quantidade
+  COLLECT wa_loja INTO t_loja. " Agrupar dados
+
+  wa_loja-werks = '1000'. " Loja
+  wa_loja-lgort = '1001'. " Secção
+  wa_loja-matnr = 'A2'.   " Material
+  wa_loja-quant = 1500.     " Quantidade
+  COLLECT wa_loja INTO t_loja. " Sumprimir dados 'quantidade' numa só linha
+
+  wa_loja-werks = '1000'. " Loja
+  wa_loja-lgort = '1002'. " Secção
+  wa_loja-matnr = 'A1'.   " Material
+  wa_loja-quant = 100.     " Quantidade
+  COLLECT wa_loja INTO t_loja. " Agrupar dados
+
+* Ler números de linhas *
+  DESCRIBE TABLE t_loja LINES v_lines.
+  v_lines = lines( t_loja ).
