@@ -1,0 +1,202 @@
+*&---------------------------------------------------------------------*
+*& Report ZABAP_DEMO06_56550
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zabap_demo06_56550.
+
+TABLES mara.  " Inicializar a tabela
+
+* Variáveis Globaís e Tipificações Locais *
+TYPES: BEGIN OF ty_s_mara2,
+         matnr TYPE matnr, " Número do material
+         mtart TYPE mtart, " Tipo de material
+         matkl TYPE matkl, " Grupo do material
+       END OF ty_s_mara2.
+
+TYPES ty_t_mara2 TYPE STANDARD TABLE OF ty_s_mara2 WITH NON-UNIQUE KEY matnr.
+
+TYPES: BEGIN OF ty_s_mara3,
+         matnr TYPE matnr, " Material
+         maktx TYPE maktx, " Descrição do material
+       END OF ty_s_mara3.
+
+TYPES ty_t_mara3 TYPE STANDARD TABLE OF ty_s_mara3 WITH NON-UNIQUE KEY matnr.
+
+
+* Constantes *
+
+
+* Ecrã de Seleção *
+PARAMETERS p_ersda TYPE mara-ersda.
+SELECT-OPTIONS s_matnr FOR mara-matnr.
+
+* Classes Locais *
+
+
+* Rotinas *
+
+
+* Pré-preenchimento do Ecrã de Seleção *
+INITIALIZATION.
+
+* Secção Principal *
+START-OF-SELECTION.
+
+* Tabela *
+  DATA t_mara  TYPE STANDARD TABLE OF mara.
+  DATA t_mara2 TYPE ty_t_mara2.
+  DATA t_mara3 TYPE ty_t_mara3.
+  DATA t_mtart TYPE RANGE OF mara-mtart.
+  DATA t_vbrk  TYPE STANDARD TABLE OF vbrk.
+  DATA t_vbrp  TYPE STANDARD TABLE OF vbrp.
+
+
+* Estrutura *
+  DATA wa_mara TYPE mara.
+  DATA wa_mara2 TYPE ty_s_mara2.
+  DATA wa_mara3 TYPE ty_s_mara3.
+  DATA wa_mtart LIKE LINE OF t_mtart. " Quando não temos um tipo de tabela/estrutura criado
+
+
+* Variáveis *
+  DATA: v_matnr TYPE mara-matnr,
+        v_matkl TYPE mara-matkl,
+        v_mtart TYPE mara-mtart,
+        v_count TYPE i.
+
+
+**********************************************************************
+
+* Leitura de todos os registos de uma tabela *
+  SELECT *
+  FROM mara
+  INTO TABLE t_mara.
+
+* Leitura de registos com uma condição *
+  SELECT *
+  FROM mara
+  INTO TABLE t_mara
+  WHERE ersda = sy-datum.
+
+  IF sy-subrc = 0.
+    " Forma devolvidos dados
+  ELSE.
+    " Não foram devolvidos dados
+
+  ENDIF.
+
+* Leitura de apenas uma linha da tabela *
+  SELECT SINGLE *
+  FROM mara
+  INTO wa_mara
+  WHERE matnr = 'A1'.
+
+* Leitura de colunas especificas de uma tabela *
+  SELECT matnr mtart matkl
+    FROM mara
+    INTO TABLE t_mara2
+    WHERE matnr = 'A1'.
+
+* Leitura de um registo para variáveis *
+  SELECT SINGLE matnr mtart matkl
+    FROM mara
+    INTO ( v_matnr, v_mtart, v_matkl )
+    WHERE matnr = 'A1'.
+
+* Leitura de coluna especificas para uma linha *
+  SELECT SINGLE matnr mtart matkl
+    FROM mara
+    INTO wa_mara2
+    WHERE matnr = 'A1'.
+
+* Leitura de dados entre tabelas (JOIN) *
+  SELECT mara~matnr makt~maktx
+    FROM mara
+    JOIN makt ON mara~matnr = makt~matnr
+    INTO TABLE t_mara3
+    WHERE ersda = sy-datum AND spras = sy-langu.
+
+  SELECT a~matnr b~maktx
+    FROM mara AS a
+    JOIN makt AS b ON a~matnr = b~matnr
+    INTO TABLE t_mara3
+    WHERE ersda = sy-datum AND spras = sy-langu.
+
+* Contador de registos para tabela *
+  SELECT SINGLE COUNT( * )
+    FROM mara
+    INTO v_count
+    WHERE ersda = sy-datum.
+
+* Ler o último registo de uma tabela *
+  SELECT SINGLE MAX( matnr )
+      FROM mara
+      INTO v_matnr
+      WHERE ersda = sy-datum.
+
+* Criação de ranges da valores *
+  " Estrutura dos Ranges
+  " HIGH - Limite superior
+  " LOW - Limite inferior
+  " OPTION - EQ, NE, GT, LT, GE, LE, BT
+  " SIGN - I, E
+
+  wa_mtart-sign = 'I'.
+  wa_mtart-option = 'EQ'.
+  wa_mtart-low = 'AA'.
+  APPEND wa_mtart TO t_mtart.
+
+  wa_mtart-low = 'BB'.
+  APPEND wa_mtart TO t_mtart.
+
+  CLEAR t_mtart.
+
+  wa_mtart-sign = 'I'.
+  wa_mtart-option = 'BT'.
+  wa_mtart-low = 'CC'.
+  wa_mtart-high = 'FF'.
+  APPEND wa_mtart TO t_mtart.
+
+
+**********************************************************************
+
+* Acesso à tabela da base de dados através de várias condições *
+  SELECT mtart matnr matkl
+  FROM mara
+  INTO CORRESPONDING FIELDS OF TABLE t_mara2              " Pega nos elementos vai ver se os elementos de dados correspondem e verifica | Desvantagem -> Perfomance
+  WHERE matnr IN s_matnr                                  " Select options
+  AND ersda EQ p_ersda                                    " Parameter
+  AND ersda BETWEEN '20250101' AND sy-datum               " Intervalo de valores
+  AND mtart EQ v_mtart                                    " Variável
+  AND mtart IS NULL                                       " Vazio
+  AND mtart IN t_mtart                                    " Range composto
+  AND mtart IN ( 'AA', 'BB', 'CC' )                       " Range simples
+  AND ( mtart = 'DD' OR mtart = 'FF' OR mtart = 'GG'  ).  " Range seleção múltipla
+
+* Range entre duas tabelas *
+  SELECT *
+  FROM vbrk
+  INTO TABLE t_vbrk
+  WHERE fkart EQ 'AAAA'.
+
+  IF sy-subrc = 0.
+    " Com dados
+    SORT t_vbrk BY vbeln ASCENDING. " Ordenar sempre os dados
+
+    SELECT *
+      FROM vbrp
+      INTO TABLE t_vbrp
+      FOR ALL ENTRIES IN t_vbrk
+      WHERE vbeln = t_vbrk-vbel.  " Espécie de um INNER JOIN para compara o campo chave da duas tabelas
+
+  ELSE.
+    " Sem dados
+  ENDIF.
+
+
+* Adicionar dados a uma tabela *
+  SELECT *
+  FROM vbrk
+  APPENDING TABLE t_vbrk
+  WHERE fkart EQ 'AAAA'.
