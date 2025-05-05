@@ -1,0 +1,152 @@
+*&---------------------------------------------------------------------*
+*& Include          ZABAP_DEMO07_56550_CLA
+*&---------------------------------------------------------------------*
+
+
+CLASS main DEFINITION FINAL.
+
+  PUBLIC SECTION.
+    CLASS-METHODS inicializacao.
+    CLASS-METHODS principal.
+
+  PROTECTED SECTION.
+
+  PRIVATE SECTION.
+
+ENDCLASS.
+
+
+CLASS main IMPLEMENTATION.
+
+  METHOD inicializacao.
+    DATA wa_fkdat LIKE LINE OF s_fkdat.
+
+    wa_fkdat-sign   = 'I'.
+    wa_fkdat-option = 'GE'.
+    wa_fkdat-low   = '20200101'.
+    APPEND wa_fkdat TO s_fkdat.
+
+
+  ENDMETHOD.
+
+  METHOD principal.
+* Tabelas *
+    DATA t_vbrk TYPE ty_t_vbrk.
+    DATA t_vbrp TYPE ty_t_vbrp.
+    DATA t_alv  TYPE ty_t_alv.
+
+* Estruturas *
+    DATA wa_vbrk TYPE ty_s_vbrk.
+    DATA wa_vbrp TYPE ty_s_vbrp.
+    DATA wa_alv  TYPE ty_s_alv.
+
+
+* Variáveis *
+
+
+**********************************************************************
+
+* Leitura dos dados para o ALV *
+* - Dados do cabeçalho
+    SELECT vbeln fkart waerk vkorg vtweg spart
+      FROM vbrk
+      INTO TABLE t_vbrk
+      WHERE vbeln IN s_vbeln
+      AND fkdat IN s_fkdat.
+
+
+    IF sy-subrc = 0.
+      SORT t_vbrk BY vbeln.
+
+    ELSE.
+      " Mensagem de erro
+      RETURN.
+
+    ENDIF.
+
+
+* - Dados do item
+    SELECT vbeln posnr fkimg vrkme matnr arktx
+      FROM vbrp
+      INTO TABLE t_vbrp
+      FOR ALL ENTRIES IN t_vbrk
+      WHERE vbeln = t_vbrk-vbeln.
+
+    IF sy-subrc = 0.
+      SORT t_vbrp BY vbeln posnr.
+
+    ELSE.
+      " Mensagem de erro
+      RETURN.
+    ENDIF.
+
+
+* Preparação dos Dados *
+    LOOP AT t_vbrk INTO wa_vbrk.
+      MOVE-CORRESPONDING wa_vbrk TO wa_alv.
+
+      LOOP AT t_vbrp INTO wa_vbrp WHERE vbeln = wa_vbrk-vbeln.
+        MOVE-CORRESPONDING wa_vbrp TO wa_alv.
+      ENDLOOP.
+
+      APPEND wa_alv TO t_alv.
+
+    ENDLOOP.
+
+
+* Visualização dos Dados *
+    CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY_LVC'
+      EXPORTING
+*       I_INTERFACE_CHECK  = ' '
+*       I_BYPASSING_BUFFER =
+*       I_BUFFER_ACTIVE    =
+        i_callback_program = 'ZABAP_DEMO07_56550'
+*       I_CALLBACK_PF_STATUS_SET          = ' '
+*       I_CALLBACK_USER_COMMAND           = ' '
+*       I_CALLBACK_TOP_OF_PAGE            = ' '
+*       I_CALLBACK_HTML_TOP_OF_PAGE       = ' '
+*       I_CALLBACK_HTML_END_OF_LIST       = ' '
+        i_structure_name   = 'ZSABAP_DEMO07__56550'
+*       I_BACKGROUND_ID    = ' '
+*       I_GRID_TITLE       =
+*       I_GRID_SETTINGS    =
+*       IS_LAYOUT_LVC      =
+*       IT_FIELDCAT_LVC    =
+*       IT_EXCLUDING       =
+*       IT_SPECIAL_GROUPS_LVC             =
+*       IT_SORT_LVC        =
+*       IT_FILTER_LVC      =
+*       IT_HYPERLINK       =
+*       IS_SEL_HIDE        =
+*       I_DEFAULT          = 'X'
+*       I_SAVE             = ' '
+*       IS_VARIANT         =
+*       IT_EVENTS          =
+*       IT_EVENT_EXIT      =
+*       IS_PRINT_LVC       =
+*       IS_REPREP_ID_LVC   =
+*       I_SCREEN_START_COLUMN             = 0
+*       I_SCREEN_START_LINE               = 0
+*       I_SCREEN_END_COLUMN               = 0
+*       I_SCREEN_END_LINE  = 0
+*       I_HTML_HEIGHT_TOP  =
+*       I_HTML_HEIGHT_END  =
+*       IT_ALV_GRAPHICS    =
+*       IT_EXCEPT_QINFO_LVC               =
+*       IR_SALV_FULLSCREEN_ADAPTER        =
+*    IMPORTING
+*       E_EXIT_CAUSED_BY_CALLER           =
+*       ES_EXIT_CAUSED_BY_USER            =
+      TABLES
+        t_outtab           = t_alv
+      EXCEPTIONS
+        program_error      = 1
+        OTHERS             = 2.
+    IF sy-subrc <> 0.
+* Implement suitable error handling here
+    ENDIF.
+
+
+
+  ENDMETHOD.
+ENDCLASS.
