@@ -1,0 +1,145 @@
+*&---------------------------------------------------------------------*
+*& Report ZABAP_DEMO03_56550
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zabap_demo03_56550.
+
+* Variáveis Globaís e Tipificações Locais *
+
+
+* Constantes *
+
+
+* Ecrã de Seleção *
+
+
+* Classes Locais *
+
+
+* Rotinas *
+
+
+* Pré-preenchimento do Ecrã de Seleção *
+INITIALIZATION.
+
+* Secção Principal *
+START-OF-SELECTION.
+
+**********************************************************************
+
+
+* Tabelas *
+  DATA t_mara TYPE STANDARD TABLE OF mara.
+
+* Estruturas *
+  DATA wa_mara TYPE mara.
+
+* Variáveis *
+  DATA v_texto TYPE c LENGTH 40.
+
+
+**********************************************************************
+
+* Operadores condicionais *
+  " IF
+  IF v_texto = 'AB'.  " Condição
+    ...               " Instrução
+  ENDIF.
+
+  IF v_texto = 'AB'.
+    " Verdadeiro
+  ELSE.
+    " Falso
+  ENDIF.
+
+  IF v_texto = 'AB'.
+    ...
+  ELSEIF v_texto = 'BC' OR v_texto = 'CD'.
+    ...
+  ELSE.
+    ...
+  ENDIF.
+
+
+  " Case
+  CASE v_texto.
+    WHEN 'AB'.
+      ...
+    WHEN 'BC' OR 'CD'.
+      ...
+    WHEN OTHERS.
+      ...
+  ENDCASE.
+
+
+**********************************************************************
+
+* Ciclos *
+
+  " DO
+  DO 5 TIMES.
+    ...
+  ENDDO.
+
+  " Ciclo Infinito
+*    DO.
+*      ...
+*    ENDDO.
+
+
+  " WHILE
+  WHILE v_texto = 'XX'.
+    ...
+  ENDWHILE.
+
+
+  " Loop
+  LOOP AT t_mara INTO wa_mara.
+    ...
+  ENDLOOP.
+
+
+* Interrupção dos ciclos *
+  " CONTINUE - Passa para a próxima linha
+  LOOP AT t_mara INTO wa_mara.
+
+    IF wa_mara-matnr = '12345'.
+      CONTINUE.
+    ELSE.
+      ...
+    ENDIF.
+
+  ENDLOOP.
+
+
+  " EXIT - Termina o ciclo
+  LOOP AT t_mara INTO wa_mara.
+
+    IF wa_mara-matnr = '12345'.
+      EXIT.
+    ELSE.
+      ...
+    ENDIF.
+
+  ENDLOOP.
+
+
+  " CHECK - Valida e executa isntrução
+  LOOP AT t_mara INTO wa_mara.
+
+    CHECK wa_mara-matnr = '12345'.
+    ...
+
+  ENDLOOP.
+
+
+**********************************************************************
+
+
+* RETURN *
+" Termina bloco de código (não deve ser usado dentro de ciclos)
+
+  IF v_texto = 'AB'.
+    RETURN.
+  ENDIF.
