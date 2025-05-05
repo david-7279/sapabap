@@ -1,0 +1,132 @@
+*&---------------------------------------------------------------------*
+*& Report ZABAP_DEMO01_56550
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zabap_demo01_56550.
+
+* Variáveis Globaís e Tipificações Locais *
+TABLES mara.  " Referência à tabela MARA (materiais)
+
+TYPES ty_char17 TYPE c LENGTH 17.           " Elemento de dados 'ty_char17' do tipo character com tamanho 17
+TYPES ty_quant  TYPE p LENGTH 7 DECIMALS 2. " Elemento de dados 'ty_quant' do tipo float com tamanho 7 e duas casas decimaís
+
+" Tipificação de Estrutura
+TYPES: BEGIN OF ty_s_kna1,
+         " Campos
+         kunnr TYPE kunnr,
+         name1 TYPE kna1-name1, " Boas práticas de programação
+         ort01 TYPE kna1-ort01,
+         pstlz TYPE kna1-pstlz,
+         stras TYPE kna1-stras,
+         idade TYPE i, " Inteiro
+         quant TYPE ty_quant,
+       END OF ty_s_kna1.
+
+" Tipificação de Tipo de Tabela
+TYPES ty_t_kna1 TYPE STANDARD TABLE OF ty_s_kna1  " Tipo de tabela da estrutura
+   WITH NON-UNIQUE KEY kunnr name1. " Chaves
+
+
+TYPES ty_t_quant TYPE STANDARD TABLE OF ty_quant. " Tipo de tabela de elemento de dados da quantidade
+TYPES ty_t_kunnr TYPE STANDARD TABLE OF kunnr.    " Tipo de tabela de elemento de dados dos clientes
+
+* Constantes *
+CONSTANTS k_data  TYPE d VALUE '20250327'.      " Contasnte 'k_data' do tipo data 'd' com o valor '20250327'
+CONSTANTS k_exten TYPE c LENGTH 4 VALUE '.xml'. " Constante 'k_exten' do tipo char 'c' com o tamanho 4 e valor '.xml'
+
+CONSTANTS: BEGIN OF k_flags, " Constante de Domínio
+             a TYPE c LENGTH 1 VALUE 'A', " Opção 'a' do tipo char 'c' com valor 'A'
+             b TYPE c LENGTH 1 VALUE 'B', " Opção 'b' do tipo char 'c' com valor 'B'
+             c TYPE c LENGTH 1 VALUE 'C', " Opção 'c' do tipo char 'c' com valor 'C'
+           END OF k_flags.
+
+* Ecrã de Seleção *
+PARAMETERS p_bukrs TYPE t001-bukrs.    " Apenas um valor 'p_bukrs' || Funicona com uma cadeia de caracteres
+SELECT-OPTIONS s_matnr FOR mara-matnr. " Vários valores 's_matnr' || Funciona como uma tabela
+
+* Classes Locais *
+
+
+* Rotinas *
+
+
+* Pré-preenchimento do Ecrã de Seleção *
+INITIALIZATION.
+
+* Secção Principal *
+START-OF-SELECTION.
+
+
+* Tabelas *
+  DATA t_kna1   TYPE ty_t_kna1.                   " Declaração de tabela 't_kna1' e usar um tipo de tabela
+  DATA t_kna1_2 TYPE STANDARD TABLE OF ty_s_kna1. " Declaração de tabela 't_kna1_2' e usar uma estrutura 'ty_s_kna1'
+  DATA t_mara   TYPE STANDARD TABLE OF mara.      " Declaração de tabela 't_mara'
+
+  DATA t_exe1   TYPE zttexe01_56550.                   " Declaração de tabela 't_exe1' e usar o tipo de tabela 'ZTTEXE01_56550'
+  DATA t_exe1_2 TYPE STANDARD TABLE OF zsexe01_56550.  " Declaração de tabela 't_exe1_2' e usar estruura 'ZSEXE01_56550'
+  DATA t_view   TYPE STANDARD TABLE OF zvexe01_56550.  " Declaração de tabela 't_view' e usar a view 'ZVEXE01_56550'
+
+
+* Estruturas *
+  DATA wa_kna1 TYPE ty_s_kna1. " Declaração de uma estrutura 'wa_kna1' e usar o tipo de tabela 'ty_s_kna1'
+  DATA wa_mara TYPE mara.      " Declaração de uma estrutura 'wa_mara' da tabela 'mara'
+
+  DATA wa_exe1   TYPE zsexe01_56550.
+  DATA wa_exe1_2 TYPE zvexe01_56550.
+
+* Variáveis *
+  DATA v_matnr1 TYPE matnr.                      " Declaração de variável 'v_matnr1' da tabela matnr
+  DATA v_matnr2 TYPE mara-matnr.                 " Declaração de variável 'v_matnr2' do campo matnr da tabela mara
+  DATA v_matnr3 TYPE c LENGTH 40.                " Declaração de variável 'v_matnr3' do tipo char 'c' com tamanho 40
+  DATA v_quant  TYPE ty_quant.                   " Declaração de variável 'v_quant' do elemento de dados 'ty_quant'
+  DATA v_data   TYPE d.                          " Declaração de variável 'v_data' do tipo data
+  DATA v_hora   TYPE t.                          " Declaração de variável 'v_hora' do tipo times 'hora'
+  DATA v_string TYPE string VALUE 'UC SAP ABAP'. " Declaração de variável 'v_string' do tipo string com valor 'UC SAP ABAP'
+  DATA v_hex30  TYPE x LENGTH 30.                " Declaração de variável 'v_hex30' do tipo hexacedimal 'x' com tamanho 30
+  DATA v_num5   TYPE n LENGTH 5.                 " Declaração de variável 'v_num5' do tipo number 'n' com tamanho 5
+  DATA v_count  TYPE i VALUE 2.                  " Declaração de variável 'v_count' do tipo inteiro 'i' com valor 2
+
+
+**********************************************************************
+
+
+* Variáveis de Sistema *
+*  SY-SUBRC - Código de retorno de instrução ABAP
+*  SY-LANGU - Idioma de Logon de Sistema
+*  SY-TABIX - Retorna a linha de uma tabela que está a ser processada
+*  SY-UNAME - Devolve o nome do utilizador do login
+*  SY-DATUM - Devolve a data de sistema
+*  SY-UZEIT - Devolve a hora de sistema
+*  SY-TCODE - Transação a ser executada
+*  SY-MANDT - Mandante de Logon do sistema
+*  SY-INDEX - Indica iteração de um ciclo
+*  SY-REPID - Indica o programa a ser executado
+*  SY-DBCNT - Indica o número de registos a ser processados numa base de dados
+*  SY-MSGID - Classe de mensagens
+*  SY-MSGNO - Número de mensagem
+*  SY-MSGTY - Tipo de mensagem | S - Sucess | E - Error | W - Warning | I - Information | A - Cancel | X - System Exception
+
+
+**********************************************************************
+
+* Comando Write *
+  WRITE 'UC SAP ABAP'.    " Imprime o conteúdo
+  WRITE v_string.         " Imprime o conteúdo da variável
+
+  WRITE: 'UC SAP ABAP', sy-datum.     " Imprime o contéudo entre pelícas e a variável
+
+  WRITE  / 'UC SAP ABAP'.             " Imprime o conteúdo com quebra de linha
+  WRITE: / 'Empresa: ', p_bukrs.      " Imprime o conteúdo da variável com quebra de linha
+
+  WRITE / v_string(5).  " Imprime os 5 primeiros caracteres [1, 2, 3, 4] != [0, 1, ,2, ,3]
+  WRITE v_string+2.     " Imprime a partir do terceiro caracter
+  WRITE v_string+3(2).  " Imprime a quarta e a quinta posição
+
+  WRITE / 'UC SAP ABAP'(001). " Traduzir
+  WRITE / TEXT-002.           " Traduzir | Boas práticas de programação
+
+  SKIP.   " Insere uma linha
+  SKIP 3. " Insere 3 linhas
+
+  ULINE. " Linha horizontal
