@@ -1,0 +1,37 @@
+*&---------------------------------------------------------------------*
+*& Include          ZABAP_DEMO07_56550_TOP
+*&---------------------------------------------------------------------*
+
+
+TABLES vbrk.
+
+* Dados do cabeçalho *
+  TYPES: BEGIN OF ty_s_vbrk,
+           vbeln TYPE vbrk-vbeln,  " Número de Documento
+           fkart TYPE vbrk-fkart,  " Tipo de Documento
+           waerk TYPE vbrk-waerk,  " Moeda
+           vkorg TYPE vbrk-vkorg,  " Organização de Vendas
+           vtweg TYPE vbrk-vtweg,  " Canal de Distribuição
+           spart TYPE vbrk-spart,  " Setor de Atividade
+         END OF ty_s_vbrk.
+
+  TYPES ty_t_vbrk  TYPE STANDARD TABLE OF ty_s_vbrk
+                   WITH NON-UNIQUE KEY vbeln.
+
+
+* Dados de Item *
+  TYPES: BEGIN OF ty_s_vbrp,
+           vbeln TYPE vbrp-vbeln, " Número de Documento
+           posnr TYPE vbrp-posnr, " Número de Item
+           fkimg TYPE vbrp-fkimg, " Quantidade
+           vrkme TYPE vbrp-vrkme, " Unidade de Medida
+           matnr TYPE vbrp-matnr, " Número de Material
+           arktx TYPE vbrp-arktx, " Descrição do Material
+         END OF ty_s_vbrp.
+
+  TYPES ty_t_vbrp  TYPE STANDARD TABLE OF ty_s_vbrp
+                   WITH NON-UNIQUE KEY vbeln posnr.
+
+
+  TYPES ty_s_alv TYPE ZSABAP_DEMO07__56550.
+  TYPES ty_t_alv TYPE STANDARD TABLE OF ZSABAP_DEMO07__56550.
