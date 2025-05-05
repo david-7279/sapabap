@@ -1,0 +1,332 @@
+*&---------------------------------------------------------------------*
+*& Report ZABAP_DEMO02_56550
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zabap_demo02_56550.
+
+* Variáveis Globaís e Tipificações Locais *
+
+
+* Constantes *
+
+
+* Ecrã de Seleção *
+
+
+* Classes Locais *
+
+
+* Rotinas *
+
+
+* Pré-preenchimento do Ecrã de Seleção *
+INITIALIZATION.
+
+* Secção Principal *
+START-OF-SELECTION.
+
+
+**********************************************************************
+
+
+* Tabelas *
+  DATA t_texto TYPE STANDARD TABLE OF char40.
+
+* Estruturas *
+
+
+* Variáveis *
+  DATA: v_num1  TYPE i,
+        v_num2  TYPE i,
+        v_num3  TYPE i,                " Declaração de três variáveis do tipo 'i' inteiro
+        v_valor TYPE p DECIMALS 2.    " Declaração de váriavel 'v_valor' do tipo  'p' float com  duas casas decimais
+
+  DATA: v_texto  TYPE c LENGTH 40,   " Declaração de váriavel 'v_texto' do tipo  'c' char com tamanho 40
+        v_texto1 TYPE c LENGTH 40,   " Declaração de váriavel 'v_texto1' do tipo 'c' char com tamanho 40
+        v_texto2 TYPE c LENGTH 40,   " Declaração de váriavel 'v_texto2' do tipo 'c' char com tamanho 40
+        v_texto3 TYPE c LENGTH 40,   " Declaração de váriavel 'v_texto3' do tipo 'c' char com tamanho 40
+        v_textox TYPE x LENGTH 40.   " Declaração de váriavel 'v_textox' do tipo 'x' hexadecimal com tamanho 40
+
+
+**********************************************************************
+
+* Atribuição de valores *
+  v_num1 = 3.
+  v_num2 = v_num1.
+  v_num3 = v_num2 = v_num1.
+
+  MOVE 3 TO v_num1. " Atribuir o valor '3' à variável 'v_num1'
+
+
+* Operações aritméticas *
+  " Adição
+  v_num1 = v_num2 + v_num3.
+  ADD v_num1 TO v_num2.     " v_num2 = v_num2 + v_num1
+  v_num1 = v_num2 + v_num3 + v_num1.
+  v_num1 += 1. " pós 7.40 (>2015)
+
+  " Subtração
+  v_num1 = v_num3 - v_num2.
+  SUBTRACT v_num2 FROM v_num1.  " v_num2 = v_num2 - v_num1
+  SUBTRACT 1 FROM v_num1.       " v_num1 = 1 - v_num1
+  v_num1 = v_num2 - v_num3 - v_num1.
+  v_num1 -= 1. " pós 7.40 (>2015)
+
+  " Divisão
+  v_num1 = v_num2 / v_num3.
+  DIVIDE v_num3 BY 2. " v_num3 = v_num3 / 2
+  v_num1 = v_num2 / v_num3 / v_num1.
+  " Parte Inteira
+  v_num1 = v_num2 DIV v_num3.
+
+  " Resto da Divisão
+  v_num1 = v_num2 MOD v_num3.
+
+
+  " Multiplicação
+  v_num1 = v_num2 * v_num3.
+  MULTIPLY v_num1 BY v_num2.
+  MULTIPLY v_num2 BY 3.
+  v_num1 = v_num2 * v_num3 * v_num1.
+
+  " Potências
+  v_num1 = v_num2 ** 2.
+
+  " Funções integradas
+  v_num1 = abs( v_num2 ).   " Valor absoluto  ** Dara espaçõs
+  v_num1 = sqrt( v_num2 ).  " Raíz quadrada   ** Dara espaçõs
+
+  " Tamanho da String
+  v_num1 = strlen( v_texto ).
+  v_num2 = xstrlen( v_textox ). " Hexadeciaml
+
+
+**********************************************************************
+
+* Operadores Relacionais *
+* <Instrução>  <Operando1> <Operador> <Operando2> *
+
+  " Igualdade
+*  v_num1 = v_num2.
+*  v_num1 EQ v_num2
+
+  " Desigualdade
+*  v_num1 <> v_num2.
+*  v_num1 NE v_num2.
+
+  " Maior que
+*  v_num1 > v_num2.
+*  v_num1 GT v_num2.
+
+  " Menor que
+*  v_num1 < v_num2.
+*  v_num1 LT v_num2.
+
+  " Maior ou igual
+*  v_num1 >= v_num2.
+*  v_num1 GE v_num2.
+
+  " Menor ou igual
+*  v_num1 <= v_num2.
+*  v_num1 LE v_num2.
+
+  " Pertence ao Intervalo
+*  v_num1 BETWEEN v_num2 AND v_num3
+
+  " Valor inicial (vazio)
+*  v_num1 IS INITIAL
+
+  " Negação
+*  v_num1 IS NOT INITIAL
+
+
+**********************************************************************
+
+* Operadores booleanos *
+* <Operando1> <Operador> <Operando2> *
+
+  " AND
+
+  " OR
+
+
+**********************************************************************
+
+* Operadores a nível de caracteres *
+* <Instrução> <Operando1> <Operador> <Operando2> *
+
+  " Contains Only
+*  v_texto CO 'ABCD' " Contém apenas
+
+  " Contains Not Only (Negação):
+*  v_texto CN 'ABCD'
+
+  " Contains ANY:
+*  v_texto CA 'ABCD' " Contém pelo menos um
+
+  " Contains NOT ANY (Negação)::
+*  v_texto NA 'ABCD'
+
+  " Contains String:
+*  v_texto CS 'ABCD' " Comtém uma ocorrência na string
+
+  " Contains NOT String (Negação)::
+*  v_texto NS 'ABCD'
+
+  " Contains Pattern:
+*  v_texto CP '*PT*' " Contém uma determinada string
+
+  " Contains NOT Pattern (Negação)::
+*  v_texto NP '*PT*'
+
+
+**********************************************************************
+
+* Operações com caracteres *
+* Deslocar o conteúdo
+
+  v_texto = 'UC SAP ABAP'.
+  WRITE: / 'Variável v_texto: ',v_texto.
+
+  SHIFT v_texto LEFT BY 7 PLACES. " Deslocar o conteúdo para a esquerd
+  WRITE: / 'Variável v_texto deslocado para a esquerda: ', v_texto.
+
+  v_texto = 'UC SAP ABAP'.
+  SHIFT v_texto RIGHT BY 7 PLACES. " Deslocar o conteúdo para a direita
+  WRITE: / 'Variável v_texto deslocado para a direita', v_texto.
+
+  v_texto = '##########UC SAP ABAP'.
+  WRITE: / 'Variável v_texto: ',v_texto.
+  SHIFT v_texto LEFT DELETING LEADING '#'. " Remover caracteres e alinhas à esquerda
+  WRITE: / 'Variável v_texto sem caracter especifico "#": ', v_texto.
+
+*  v_texto = 'UC SAP ABAP'.
+*  WRITE: / 'Variável v_texto: ', v_texto.
+*  SHIFT v_texto LEFT DELETING LEADING space.
+*  WRITE: / 'Variável v_texto sem espaços e alinhado à direita: ', v_texto.
+
+
+**********************************************************************
+
+* Substituição de Conteúdo *
+
+  WRITE /.
+  v_texto = 'UC SAP ABAP'.
+
+  REPLACE FIRST OCCURRENCE OF 'SAP' IN v_texto WITH 'IPB'. " Substituir a 1º ocorrência numa string
+  WRITE: / 'Variável v_texto com substituição de conteúdo: ', v_texto.
+
+  v_texto = 'UC SAP ABAP'.
+  REPLACE ALL OCCURRENCES OF 'SAP' IN v_texto WITH '2025'. " Substituir todas as ocorrência numa string
+  WRITE: / 'Variável v_texto com substituição de conteúdo: ', v_texto.
+
+  v_texto = 'UC SAP ABAP'.
+  REPLACE FIRST OCCURRENCE OF 'SAP' IN TABLE t_texto WITH 'IPB'. " Substituir a 1º ocorrência numa tabela
+  WRITE: / 'Variável v_texto com substituição de conteúdo: ', v_texto.
+
+  v_texto = 'UC SAP ABAP'.
+  REPLACE ALL OCCURRENCES OF 'SAP' IN TABLE t_texto WITH 'IPB'. " Substituir todas as ocorrência numa tabela (Obsuleto)
+  WRITE: / 'Variável v_texto com substituição de conteúdo: ', v_texto.
+
+
+**********************************************************************
+
+* Conversão de valores *
+
+  WRITE /.
+  v_texto = 'uc sap abap'.
+
+  TRANSLATE v_texto TO UPPER CASE. " Conversão para maiúsculas
+  WRITE: / 'Variável v_texto convertida para maiúsculas: ', v_texto.
+
+  v_texto = 'UC SAP ABAP'.
+  TRANSLATE v_texto TO LOWER CASE. " Conversão para minúsculas
+  WRITE: / 'Variável v_texto convertida para minúsculas: ', v_texto.
+
+
+**********************************************************************
+
+* Procurar conteúdo na string *
+
+  WRITE /.
+  v_texto = 'UC SAP ABAP'.
+
+  FIND FIRST OCCURRENCE OF 'ABAP' IN v_texto. " Procurar a 1º ocorrência
+  WRITE: / 'Primeira ocorrência da variável v_texto "ABAP": ', v_texto.
+  IF sy-subrc = 0.
+    WRITE: / 'Verdadeiro: ', sy-subrc.
+  ELSE.
+    WRITE: / 'Falso: ', sy-subrc.
+  ENDIF.
+
+  v_texto = 'UC SAP ABAP'.
+  FIND FIRST OCCURRENCE OF 'ABAP' IN TABLE t_texto. " Procurar a 1º ocorrência
+  WRITE: / 'Primeira ocorrência da variável v_texto na tabela "ABAP": ', v_texto.
+  IF sy-subrc = 0.
+    WRITE: / 'Verdadeiro: ', sy-subrc.
+  ELSE.
+    WRITE: / 'Falso: ', sy-subrc.
+  ENDIF.
+
+
+**********************************************************************
+
+* Condensar conteúdo *
+
+  WRITE /.
+  v_texto = 'UC    SAP       ABAP'.
+  WRITE: / 'Variável v_texto: ', v_texto.
+
+  CONDENSE v_texto." Retirar os espaços
+  WRITE: / 'Variável v_texto condensionada: ', v_texto.
+
+  v_texto = 'UC    SAP       ABAP'.
+  CONDENSE v_texto NO-GAPS." Retirar os espaços
+  WRITE: / 'Variável v_texto sem espaços: ', v_texto.
+
+  CONCATENATE 'UC' 'SAP' 'ABAP' INTO v_texto.
+  WRITE: / 'Variável v_texto concatenada ', v_texto.
+
+  CONCATENATE 'UC' 'SAP' 'ABAP' INTO v_texto SEPARATED BY space.
+  WRITE: / 'Variável v_texto concatenada com espaco: ', v_texto.
+
+  CONCATENATE 'UC   ' '   SAP' '   ABAP' INTO v_texto RESPECTING BLANKS.
+  WRITE: / 'Variável v_texto concatenada com espacos respeitados: ', v_texto.
+
+
+**********************************************************************
+
+* Separa conteúdo de uma string *
+
+  WRITE /.
+  v_texto = 'UC#SAP#ABAP'.
+  WRITE: / 'Variável v_texto: ', v_texto.
+
+  SPLIT v_texto AT '#' INTO v_texto1 v_texto2 v_texto3. " Separa conteudo de uma string
+  WRITE: / 'Variável v_texto1: ', v_texto1.
+  WRITE: / 'Variável v_texto2: ', v_texto2.
+  WRITE: / 'Variável v_texto3: ', v_texto3.
+
+  SPLIT v_texto AT '#' INTO TABLE t_texto. " Separa conteudo de uma string na tabela
+
+
+**********************************************************************
+
+* Conversão de conteúdo *
+
+  WRITE /.
+  WRITE sy-datum TO v_texto. " Não mostra conteúdo
+  WRITE: / 'Variável v_texto: ', v_texto.
+  WRITE sy-datum TO v_texto DDMMYY. " Obsuleto
+
+  v_valor = '1500.50'.
+  WRITE v_valor TO v_texto CURRENCY 'EUR'.
+  WRITE: / 'Variável v_texto com conversão da moeda: ', v_texto.
+
+  v_valor = '1500.50-'.
+  WRITE v_valor TO v_texto CURRENCY 'EUR'.
+  WRITE: / 'Variável v_texto com conversão da moeda: ', v_texto.
+
+  CONDENSE v_texto.
+  WRITE: / 'Variável v_texto com conversão da moeda sem espaços: ', v_texto.
