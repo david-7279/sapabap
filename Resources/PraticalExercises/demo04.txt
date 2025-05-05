@@ -1,0 +1,76 @@
+*&---------------------------------------------------------------------*
+*& Report ZABAP_DEMO04_56550
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zabap_demo04_56550.
+
+* Variáveis Globaís e Tipificações Locais *
+
+
+* Constantes *
+
+
+* Ecrã de Seleção *
+PARAMETERS p_name1 TYPE kna1-name1.
+PARAMETERS p_name2 TYPE kna1-name2.
+PARAMETERS p_name3 TYPE kna1-name3.
+PARAMETERS p_name4 TYPE kna1-name4.
+
+PARAMETERS p_separ TYPE char1.
+PARAMETERS p_lengt TYPE i.
+
+
+* Classes Locais *
+
+
+* Rotinas *
+
+
+* Pré-preenchimento do Ecrã de Seleção *
+INITIALIZATION.
+
+* Secção Principal *
+START-OF-SELECTION.
+
+
+* Tabelas *
+
+
+* Estruturas *
+
+* Variáveis *
+  DATA v_nomecliente TYPE text150.
+
+
+**********************************************************************
+
+
+* Chamar módulo de função *
+  CALL FUNCTION 'Z_ABAP_DEMO04_56550'
+    EXPORTING
+      i_name1       = p_name1
+      i_name2       = p_name2
+      i_name3       = p_name3
+      i_name4       = p_name4
+      i_separador   = p_separ
+    IMPORTING
+      e_nomecliente = v_nomecliente
+    changing
+      c_comprimento = p_lengt
+    EXCEPTIONS
+      ex_name_error = 1
+      OTHERS        = 2.
+
+  IF sy-subrc = 0.
+* Implement suitable error handling here
+    WRITE:  / 'Nome do cliente: ', v_nomecliente,
+            / 'Comprimento: ', p_lengt.
+
+    ELSE.
+      " Mensagem de erro fiqua automaticamente guardada
+      MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO
+        WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4
+        DISPLAY LIKE 'E'.
+
+  ENDIF.
