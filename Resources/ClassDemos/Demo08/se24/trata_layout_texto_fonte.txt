@@ -1,0 +1,5 @@
+  METHOD trata_layout.
+    es_layout-info_fname = 'LINCO'. " Configurações Técnicas da cor da linha
+    es_layout-ctab_fname = 'CELCO'. " Configurações Técnicas da cor da celula
+    es_layout-zebra      = abap_true.
+  ENDMETHOD.

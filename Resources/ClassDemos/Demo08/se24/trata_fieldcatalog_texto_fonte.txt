@@ -1,0 +1,54 @@
+  METHOD trata_fieldcatalog.
+    FIELD-SYMBOLS <fs_fieldcat> LIKE LINE OF et_fieldcat.
+
+    CALL FUNCTION 'LVC_FIELDCATALOG_MERGE'
+      EXPORTING
+        i_structure_name       = gv_sname " Atributo
+      CHANGING
+        ct_fieldcat            = et_fieldcat
+      EXCEPTIONS
+        inconsistent_interface = 1
+        program_error          = 2
+        OTHERS                 = 3.
+
+    IF sy-subrc = 0.
+
+      LOOP AT et_fieldcat ASSIGNING <fs_fieldcat>.
+
+        CASE <fs_fieldcat>-fieldname.
+          WHEN 'VBELN'.
+            <fs_fieldcat>-key = abap_true. " Chave Primária
+
+          WHEN 'POSNR'.
+            <fs_fieldcat>-key = abap_true. " Chave Primária
+
+          WHEN 'MATNR'. " Colorir a Coluna do Material
+            "1 - Azul
+            "2 - Cinzento
+            "3 - Amarelo
+            "4 - Azul Claro
+            "5 - Verde
+            "6 - Vermelho
+            "7 - Laranja
+            <fs_fieldcat>-emphasize = 'C510'.
+            <fs_fieldcat>-col_opt   = abap_true. " Otimiza a coluna
+
+          WHEN 'FKIMG'. "Somatório da Quantidade
+            <fs_fieldcat>-do_sum = abap_true.
+
+          WHEN 'LINCO' OR 'CELCO'. " Ativar configurações
+            <fs_fieldcat>-tech = abap_true.
+
+          WHEN 'PISCO'.
+            <fs_fieldcat>-checkbox  = abap_true.
+            <fs_fieldcat>-outputlen = 5.
+
+          WHEN OTHERS.
+        ENDCASE.
+
+      ENDLOOP.
+
+    ELSE.
+      "Mensagem de Erro
+    ENDIF.
+  ENDMETHOD.

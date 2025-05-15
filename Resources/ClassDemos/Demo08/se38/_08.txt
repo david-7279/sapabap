@@ -1,0 +1,19 @@
+*&---------------------------------------------------------------------*
+*& Report ZABAP_DEMO08_56550
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZABAP_DEMO08_56550.
+
+
+INCLUDE ZABAP_DEMO08_56550_TOP.
+INCLUDE ZABAP_DEMO08_56550_SCR.
+INCLUDE ZABAP_DEMO08_56550_CLA.
+
+* Pré-preenchimento do ecrã de seleção (Primeira execução) *
+INITIALIZATION.
+CALL METHOD main=>inicializacao.  " Chamar o método da classe
+
+* Secção principal *
+START-OF-SELECTION.
+CALL METHOD main=>principal.      " Chamar o método da classe

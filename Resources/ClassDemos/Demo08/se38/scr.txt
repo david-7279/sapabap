@@ -1,0 +1,7 @@
+*&---------------------------------------------------------------------*
+*& Include          ZABAP_DEMO08_56550_SCR
+*&---------------------------------------------------------------------*
+
+
+SELECT-OPTIONS s_vbeln FOR vbrk-vbeln.              " Número do Documento
+SELECT-OPTIONS s_fkdat FOR vbrk-fkdat OBLIGATORY.   " Data do Documento [Obrigatório]

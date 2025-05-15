@@ -1,0 +1,15 @@
+  METHOD trata_sort.
+    DATA wa_sort LIKE LINE OF et_sort. " TYPE LVC_S_SORT
+
+* Número de Documento *
+    wa_sort-spos      = '01'.
+    wa_sort-fieldname = 'VBELN'.
+    wa_sort-up        = abap_true. " 'X'
+    APPEND wa_sort TO et_sort.
+
+* Número de Item *
+    wa_sort-spos      = '02'.
+    wa_sort-fieldname = 'POSNR'.
+    wa_sort-up        = abap_true.
+    APPEND wa_sort TO et_sort.
+  ENDMETHOD.

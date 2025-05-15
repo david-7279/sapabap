@@ -1,0 +1,241 @@
+*&---------------------------------------------------------------------*
+*& Include          ZABAP_DEMO08_56550_CLA
+*&---------------------------------------------------------------------*
+
+CLASS main DEFINITION FINAL.
+  PUBLIC SECTION.
+    CLASS-METHODS inicializacao.
+    CLASS-METHODS principal.
+
+  PRIVATE SECTION.
+    CLASS-METHODS trata_fieldcatalog EXPORTING et_fieldcat TYPE lvc_t_fcat.
+    CLASS-METHODS trata_layout EXPORTING es_layout TYPE lvc_s_layo.
+    CLASS-METHODS trata_sort EXPORTING et_sort TYPE lvc_t_sort.
+ENDCLASS.
+
+CLASS main IMPLEMENTATION.
+  METHOD inicializacao.
+
+    DATA wa_fkdat LIKE LINE OF s_fkdat.
+
+    wa_fkdat-sign   = 'I'.
+    wa_fkdat-option = 'GE'.
+    wa_fkdat-low    = '20200101'.
+    APPEND wa_fkdat TO s_fkdat.
+
+  ENDMETHOD.
+
+
+**********************************************************************
+
+  METHOD principal.
+
+* Tabelas *
+    DATA t_vbrk     TYPE ty_t_vbrk.
+    DATA t_vbrp     TYPE ty_t_vbrp.
+    DATA t_alv      TYPE ty_t_alv.
+    DATA t_fieldcat TYPE lvc_t_fcat.
+    DATA t_sort     TYPE lvc_t_sort.
+
+* Estruturas *
+    DATA wa_vbrk   TYPE ty_s_vbrk.
+    DATA wa_vbrp   TYPE ty_s_vbrp.
+    DATA wa_alv    TYPE ty_s_alv.
+    DATA wa_layout TYPE lvc_s_layo.
+    DATA wa_celco  TYPE lvc_s_scol.
+
+* Variáveis *
+    DATA v_title TYPE lvc_title.
+
+
+**********************************************************************
+
+* Leitura dos dados para o ALV *
+    " Dados de Cabeçalho
+    SELECT vbeln fkart waerk vkorg vtweg spart
+      FROM vbrk
+        INTO TABLE t_vbrk
+          WHERE vbeln IN s_vbeln AND fkdat IN s_fkdat.
+
+    IF sy-subrc = 0.
+      SORT t_vbrk BY vbeln.
+    ELSE.
+      " Mensagem de Erro
+      RETURN.
+    ENDIF.
+
+    " Dados de Item
+    SELECT vbeln posnr fkimg vrkme matnr arktx
+      FROM vbrp
+        INTO TABLE t_vbrp
+          FOR ALL ENTRIES IN t_vbrk
+            WHERE vbeln = t_vbrk-vbeln.
+
+    IF sy-subrc = 0.
+      SORT t_vbrp BY vbeln posnr.
+    ELSE.
+      " Mensagem de Erro
+      RETURN.
+    ENDIF.
+
+* Preparação dos Dados *
+    LOOP AT t_vbrk INTO wa_vbrk.
+
+      MOVE-CORRESPONDING wa_vbrk TO wa_alv.
+
+      " Icone e Pisco
+      CASE wa_vbrk-fkart.
+        WHEN 'F2'.
+          wa_alv-icone = icon_green_light.  " Semáforo Verde
+          wa_alv-pisco = abap_true.         " Check-Box
+
+        WHEN OTHERS.
+          wa_alv-icone = icon_red_light.    " Semáforo Vermelho
+
+      ENDCASE.
+
+      LOOP AT t_vbrp INTO wa_vbrp WHERE vbeln = wa_vbrk-vbeln.
+
+        MOVE-CORRESPONDING wa_vbrp TO wa_alv.
+
+        " Colorir Células
+        IF wa_vbrp-vrkme = 'CS'. "Formato Externo: CXT
+
+          wa_celco-fname = 'VRKME'.
+          wa_celco-color-col = 5.
+          wa_celco-color-int = 1.
+          wa_celco-color-inv = 0.
+          APPEND wa_celco TO wa_alv-celco.
+
+        ENDIF.
+
+        " Colorir Linhas
+        IF wa_alv-fkimg BETWEEN 4 AND 5.
+          wa_alv-linco = 'C710'.
+        ENDIF.
+
+        APPEND wa_alv TO t_alv.
+
+      ENDLOOP.
+
+    ENDLOOP.
+
+*   Configurações Técnicas
+
+    " Trata do Catálogo de Campos
+    CALL METHOD trata_fieldcatalog IMPORTING et_fieldcat = t_fieldcat.
+
+    " Trata do Layout
+    CALL METHOD trata_layout IMPORTING es_layout = wa_layout.
+
+    " Trata da Ordenação
+    CALL METHOD trata_sort IMPORTING et_sort = t_sort.
+
+    v_title = TEXT-001. "Título do Relatório
+
+* Visualização dos Dados *
+    CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY_LVC'
+      EXPORTING
+        i_callback_program = 'ZABAP_DEMO07_00001'
+        i_structure_name   = 'ZSABAP_DEMO07_00001'
+        i_grid_title       = v_title
+        is_layout_lvc      = wa_layout
+        it_fieldcat_lvc    = t_fieldcat
+        it_sort_lvc        = t_sort
+      TABLES
+        t_outtab           = t_alv
+      EXCEPTIONS
+        program_error      = 1
+        OTHERS             = 2.
+
+    IF sy-subrc <> 0.
+    ENDIF.
+
+  ENDMETHOD.
+
+
+**********************************************************************
+
+  METHOD trata_fieldcatalog.
+
+    FIELD-SYMBOLS <fs_fieldcat> LIKE LINE OF et_fieldcat.
+
+    CALL FUNCTION 'LVC_FIELDCATALOG_MERGE'
+      EXPORTING
+        i_structure_name       = 'ZSABAP_DEMO07__56550'
+      CHANGING
+        ct_fieldcat            = et_fieldcat
+      EXCEPTIONS
+        inconsistent_interface = 1
+        program_error          = 2
+        OTHERS                 = 3.
+
+    IF sy-subrc = 0.
+
+      LOOP AT et_fieldcat ASSIGNING <fs_fieldcat>.
+
+        CASE <fs_fieldcat>-fieldname.
+          WHEN 'VBELN'.
+            <fs_fieldcat>-key = abap_true. " Chave Primária
+
+          WHEN 'POSNR'.
+            <fs_fieldcat>-key = abap_true. " Chave Primária
+
+          WHEN 'MATNR'. " Colorir a Coluna do Material
+            "1 - Azul
+            "2 - Cinzento
+            "3 - Amarelo
+            "4 - Azul Claro
+            "5 - Verde
+            "6 - Vermelho
+            "7 - Laranja
+            <fs_fieldcat>-emphasize = 'C510'.
+            <fs_fieldcat>-col_opt   = abap_true. " Otimiza a coluna
+
+          WHEN 'FKIMG'. "Somatório da Quantidade
+            <fs_fieldcat>-do_sum = abap_true.
+
+          WHEN 'LINCO' OR 'CELCO'. " Ativar configurações
+            <fs_fieldcat>-tech = abap_true.
+
+          WHEN 'PISCO'.
+            <fs_fieldcat>-checkbox  = abap_true.
+            <fs_fieldcat>-outputlen = 5.
+
+          WHEN OTHERS.
+        ENDCASE.
+
+      ENDLOOP.
+
+    ELSE.
+      "Mensagem de Erro
+    ENDIF.
+
+  ENDMETHOD.
+
+  METHOD trata_layout.
+
+    es_layout-info_fname = 'LINCO'. " Configurações Técnicas da cor da linha
+    es_layout-ctab_fname = 'CELCO'. " Configurações Técnicas da cor da celula
+    es_layout-zebra      = abap_true.
+
+  ENDMETHOD.
+
+  METHOD trata_sort.
+
+    DATA wa_sort LIKE LINE OF et_sort. " TYPE LVC_S_SORT
+
+* Número de Documento *
+    wa_sort-spos      = '01'.
+    wa_sort-fieldname = 'VBELN'.
+    wa_sort-up        = abap_true. " 'X'
+    APPEND wa_sort TO et_sort.
+
+* Número de Item *
+    wa_sort-spos      = '02'.
+    wa_sort-fieldname = 'POSNR'.
+    wa_sort-up        = abap_true.
+    APPEND wa_sort TO et_sort.
+
+  ENDMETHOD.
+ENDCLASS.
