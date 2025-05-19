@@ -1,0 +1,229 @@
+*&---------------------------------------------------------------------*
+*& Report ZABAP_DEMO09_56550
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zabap_demo09_56550.
+
+* Declarações Implicitas da variável *
+" Pré 7.4
+DATA t_mara1 TYPE STANDARD TABLE OF mara.
+
+SELECT *
+FROM mara
+INTO TABLE t_mara1
+WHERE mtart = 'ERDA'.
+
+" Pós 7.4
+SELECT *
+FROM mara
+WHERE mtart = 'ERDA'
+INTO TABLE @DATA(t_mara2). " Permite criar uma tabela diretamente
+
+
+**********************************************************************
+
+* Obter uma linha *
+" Pré 7.4
+DATA v_mtart TYPE mtart.
+
+SELECT SINGLE mtart
+FROM mara
+INTO v_mtart
+WHERE matnr = '00000010'.
+
+" Pós 7.4
+SELECT mtart
+  UP TO 1 ROWS
+  FROM mara
+  INTO @DATA(v_mtart2)
+  WHERE matnr = '00000010'.
+ENDSELECT.
+* OU *
+SELECT SINGLE *
+FROM mara
+WHERE matnr = '00000010'
+INTO @DATA(v_mtart3).
+
+
+**********************************************************************
+
+* Declarações de Variáveis e Atribuição de Valores *
+" Pré 7.4
+DATA v_texto1 TYPE string.
+DATA t_lines1 TYPE i.
+
+v_texto1 = 'Texto de Exemplo 1'.
+t_lines1 = lines( t_mara1 ).
+
+
+" Pós 7.4
+DATA(v_texto2) = 'Texto de Exemplo 2'.
+DATA(t_lines2) = lines( t_mara1 ).
+
+
+**********************************************************************
+
+* Delcração Implícita de Estruturas *
+" Pré 7.4
+DATA t_vbrk TYPE STANDARD TABLE OF vbrk.
+DATA wa_vbrk TYPE vbrk.
+
+LOOP AT t_vbrk INTO wa_vbrk.
+  ...
+ENDLOOP.
+READ TABLE t_vbrk INTO wa_vbrk INDEX 1.
+
+" Pós 7.4
+LOOP AT t_vbrk INTO DATA(wa_vbrk2).
+  ...
+ENDLOOP.
+READ TABLE t_vbrk INTO DATA(wa_vbrk3) INDEX 1.
+
+
+**********************************************************************
+
+* Declaração de Variáveis com Valor *
+" Pré 7.4
+DATA v_count1 TYPE i.
+v_count1 = 3.
+
+" Pós 7.4
+DATA(v_count2) = NEW i( 3 ).
+
+
+**********************************************************************
+
+* Inserir Linhas de Código - Comando VALUE *
+" Pré 7.4
+DATA t_texto1 TYPE string_table.
+APPEND 'Texto 1' TO t_texto1.
+APPEND 'Texto 2' TO t_texto1.
+APPEND 'Texto 3' TO t_texto1.
+
+" Pós 7.4
+DATA(t_texto2) = VALUE string_table(
+  ( `Texto1` )
+  ( `Texto2` )
+  ( `Texto3` )
+).
+
+
+**********************************************************************
+
+* Filtrar Dados de uma Tabela Interna *
+TYPES: BEGIN OF ty_s_t001,
+         bukrs TYPE t001-bukrs,
+         butxt TYPE t001-butxt,
+         land1 TYPE t001-land1,
+       END OF ty_s_t001.
+
+TYPES ty_t_t001 TYPE STANDARD TABLE OF ty_s_t001
+                WITH NON-UNIQUE SORTED KEY bukrs
+                COMPONENTS bukrs butxt land1.
+
+" Pré 7.4
+DATA t_t001 TYPE ty_t_t001.
+DATA t_t0011 TYPE ty_t_t001.
+DATA wa_t001 TYPE ty_s_t001.
+
+LOOP AT t_t001 INTO wa_t001 WHERE bukrs = '1000'.
+  APPEND wa_t001 TO t_t0011.
+ENDLOOP.
+
+" Pós 7.4
+DATA(t_t0012) = FILTER #( t_t001 USING KEY bukrs WHERE bukrs = '1000' ). " Permite uma identifcacao em linha
+
+
+**********************************************************************
+
+* Concatenação de Strings *
+DATA v_texto3 TYPE string.
+DATA v_texto4 TYPE string.
+DATA v_texto5 TYPE string.
+DATA v_final  TYPE string.
+
+v_texto3 = 'Texto 3'.
+v_texto4 = 'Texto 4'.
+v_texto5 = 'Texto 5'.
+
+" Pré 7.4
+CONCATENATE v_texto3 v_texto4 v_texto5 INTO v_final.
+CONCATENATE 'Incluir ' v_texto4 v_texto5 INTO v_final.
+CONCATENATE v_texto3 v_texto4 v_texto5 INTO v_final SEPARATED BY space.
+
+" Pós 7.4
+v_final = v_texto3 && v_texto4 && v_texto5.
+v_final = |'Incluir '{ v_texto4 }{ v_texto5 }|.
+v_final = v_texto3 && || &&  v_texto4 && || && v_texto5.
+
+
+**********************************************************************
+
+* Rotinas de Conversão *
+DATA v_kunnr1 TYPE kunnr.
+DATA v_kunnr2 TYPE kunnr.
+
+" Pré 7.4
+CALL FUNCTION 'CONVERSION_EXIT_ALPHA_OUTPUT'
+  EXPORTING
+    input  = v_kunnr1
+  IMPORTING
+    output = v_kunnr2.
+.
+
+" Pós 7.4
+v_kunnr2 = |{ v_kunnr1 ALPHA = OUT }|.
+
+
+**********************************************************************
+
+* Instrução CASE e Atribuição de Valor - Comando COND e SWITCH *
+DATA v_mtart4 TYPE mtart.
+DATA v_maktx  TYPE maktx.
+
+" Pré 7.4
+CASE v_mtart4.
+  WHEN 'AA'.
+    v_maktx = 'Material AA'.
+  WHEN 'BB'.
+    v_maktx = 'Material BB'.
+  WHEN 'CC'.
+    v_maktx = 'Material CC'.
+  WHEN OTHERS.
+    v_maktx = 'Outro Material'.
+ENDCASE.
+
+" Pós 7.4
+" COND
+v_maktx = COND #(
+  WHEN v_mtart4 = 'AA' THEN 'Material AA'
+  WHEN v_mtart4 = 'BB' THEN 'Material BB'
+  WHEN v_mtart4 = 'CC' THEN 'Material CC'
+  ELSE 'Outro Material'
+).
+" SWITCH
+v_maktx = SWITCH #( v_mtart4
+  WHEN 'AA' THEN 'Material AA'
+  WHEN 'BB' THEN 'Material BB'
+  WHEN 'CC' THEN 'Material CC'
+  ELSE 'Outro Material'
+).
+
+
+**********************************************************************
+
+* Operações Aritméticas *
+DATA v_valor TYPE i.
+
+" Pré 7.4
+ADD 1 TO v_valor.
+SUBTRACT 1 FROM v_valor.
+MULTIPLY v_valor BY 2.
+DIVIDE v_valor BY 2.
+
+" Pós 7.4
+v_valor += 1.
+v_valor -= 1.
+v_valor *= 2.
+v_valor /= 2.
